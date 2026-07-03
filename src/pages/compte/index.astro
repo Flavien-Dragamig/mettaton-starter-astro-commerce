@@ -1,0 +1,39 @@
+---
+import { medusaFetch } from '../../lib/medusa-client';
+
+// Page active uniquement en mode `medusa` (SSR à la demande, Palier 2).
+// En mode `snipcart` (statique) elle est prerendered sans lecture de cookie ni
+// appel réseau, afin de garder le build statique vert sans backend Medusa.
+export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
+
+let customer: any = null;
+if (import.meta.env.COMMERCE_MODE === 'medusa') {
+	const token = Astro.cookies.get('medusa_jwt')?.value;
+	if (!token) {
+		return Astro.redirect('/compte/connexion');
+	}
+
+	const res = await medusaFetch('/store/customers/me', {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!res.ok) {
+		return Astro.redirect('/compte/connexion');
+	}
+	({ customer } = await res.json());
+}
+---
+
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<title>Mon compte</title>
+	</head>
+	<body>
+		{customer && (
+			<>
+				<h1>Bonjour {customer.first_name}</h1>
+				<p>{customer.email}</p>
+			</>
+		)}
+	</body>
+</html>
