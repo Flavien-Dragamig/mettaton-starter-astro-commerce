@@ -128,8 +128,14 @@ export default class PayPlugPaymentProviderService extends AbstractPaymentProvid
 
   async refundPayment(input: RefundPaymentInput, refundAmount?: number): Promise<RefundPaymentOutput> {
     const id = (input.data as { id: string }).id;
-    void refundAmount;
-    await this.request(`/payments/${id}/refunds`, { method: "POST", body: JSON.stringify({}) });
+    // PayPlug traite un champ `amount` absent comme "rembourser le solde
+    // restant total" - un `refundAmount` fourni doit donc impérativement être
+    // converti en centimes (même convention que buildCreatePaymentPayload) et
+    // transmis, sous peine de transformer silencieusement un remboursement
+    // partiel en remboursement total.
+    const body =
+      refundAmount === undefined ? {} : { amount: Math.round(refundAmount * 100) };
+    await this.request(`/payments/${id}/refunds`, { method: "POST", body: JSON.stringify(body) });
     return { data: input.data ?? {} };
   }
 
