@@ -19,7 +19,7 @@ describe("PayPlugPaymentProviderService", () => {
     const service = makeService(fetchImpl as never);
 
     const result = await service.initiatePayment({
-      amount: { numeric: 49.99 } as never,
+      amount: 49.99,
       currency_code: "eur",
       context: {},
     } as never);
@@ -100,7 +100,7 @@ describe("PayPlugPaymentProviderService", () => {
     const service = makeService(fetchImpl as never);
 
     await expect(
-      service.initiatePayment({ amount: { numeric: 10 } as never, currency_code: "eur", context: {} } as never),
+      service.initiatePayment({ amount: 10, currency_code: "eur", context: {} } as never),
     ).rejects.toThrow(/PayPlug/);
   });
 });

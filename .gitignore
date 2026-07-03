@@ -1,5 +1,6 @@
 # build output
 dist/
+.medusa/
 
 # Playwright (rapports & artefacts de test)
 test-results/

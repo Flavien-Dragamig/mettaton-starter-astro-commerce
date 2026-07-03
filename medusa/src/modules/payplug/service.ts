@@ -1,4 +1,4 @@
-import { AbstractPaymentProvider } from "@medusajs/framework/utils";
+import { AbstractPaymentProvider, BigNumber } from "@medusajs/framework/utils";
 import type {
   InitiatePaymentInput,
   InitiatePaymentOutput,
@@ -74,7 +74,7 @@ export default class PayPlugPaymentProviderService extends AbstractPaymentProvid
   async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     const context = input.context as { return_url?: string; cancel_url?: string; notification_url?: string } | undefined;
     const payload = buildCreatePaymentPayload({
-      amountCents: Math.round(Number(input.amount.numeric) * 100),
+      amountCents: Math.round(new BigNumber(input.amount).numeric * 100),
       currency: input.currency_code.toUpperCase(),
       returnUrl: context?.return_url ?? "",
       cancelUrl: context?.cancel_url ?? "",

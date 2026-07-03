@@ -14,12 +14,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@medusajs/admin-sdk": "^2.10.0",
     "@medusajs/framework": "^2.10.0",
     "@medusajs/medusa": "^2.10.0",
     "pg": "^8.13.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.0",
     "vitest": "^4.1.9"
   }
