@@ -1,0 +1,26 @@
+{
+  "name": "mettaton-medusa-backend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "medusa build",
+    "dev": "medusa develop",
+    "start": "medusa start",
+    "db:migrate": "medusa db:migrate",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@medusajs/framework": "^2.10.0",
+    "@medusajs/medusa": "^2.10.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.9"
+  }
+}
