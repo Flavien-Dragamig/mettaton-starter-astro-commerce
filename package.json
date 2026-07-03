@@ -11,6 +11,7 @@
     "build": "npm run tina:build && astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "test": "vitest run",
     "tina:build": "TINA_PUBLIC_IS_LOCAL=true tinacms build --local --skip-cloud-checks --skip-indexing",
     "backend:bundle": "node tina/backend/build.mjs",
     "backend:start": "node dist-backend/server.mjs"
@@ -28,10 +29,12 @@
     "tinacms-gitprovider-github": "^4.1.10"
   },
   "devDependencies": {
+    "@astrojs/node": "^10.1.4",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.25",
     "esbuild": "^0.27.7",
-    "tsx": "^4.22.4"
+    "tsx": "^4.22.4",
+    "vitest": "^4.1.9"
   }
 }
