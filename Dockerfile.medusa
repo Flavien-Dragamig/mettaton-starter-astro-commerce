@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+#
+# Backend Medusa v2 self-host — Mettaton Palier 2.
+# Contexte de build = racine du repo (cohabite avec Dockerfile.backend/Tina),
+# mais seul le sous-dossier medusa/ est copié dans l'image.
+#
+#   - base    : installe les deps du sous-projet medusa/, build TypeScript
+#               (medusa build → dist/ + .medusa/server).
+#   - runtime : exécute via entrypoint.sh (migrations DB au runtime — jamais
+#               au build, Postgres n'existe qu'une fois le conteneur démarré).
+
+FROM node:22-bookworm-slim AS base
+WORKDIR /app/medusa
+COPY medusa/package.json medusa/package-lock.json* ./
+RUN npm install
+COPY medusa/ .
+RUN npm run build
+
+FROM node:22-bookworm-slim AS runtime
+WORKDIR /app/medusa
+ENV NODE_ENV=production
+COPY --from=base /app/medusa ./
+RUN chmod +x ./entrypoint.sh
+EXPOSE 9000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:9000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+ENTRYPOINT ["./entrypoint.sh"]

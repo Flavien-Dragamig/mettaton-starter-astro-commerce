@@ -1,6 +1,8 @@
 node_modules
 dist
 dist-backend
+medusa/node_modules
+medusa/dist
 .git
 .github
 .env
