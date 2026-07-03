@@ -1,0 +1,26 @@
+---
+// Page active uniquement en mode `medusa` (SSR à la demande, Palier 2).
+// En mode `snipcart` (statique) elle est prerendered : `is_b2b` (paramètre de
+// requête) n'est pas disponible au build, le formulaire retombe sur la seule
+// option carte bancaire, ce qui garde le build statique vert sans backend Medusa.
+export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
+
+const isB2B = Astro.url.searchParams.get('is_b2b') === 'true';
+---
+
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<title>Paiement</title>
+	</head>
+	<body>
+		<h1>Paiement</h1>
+		<form id="form-checkout" method="POST" action="/api/checkout/valider">
+			<label><input type="radio" name="mode_paiement" value="carte" checked /> Carte bancaire</label>
+			{isB2B && (
+				<label><input type="radio" name="mode_paiement" value="facture_differee" /> Facture à 30 jours</label>
+			)}
+			<button type="submit">Confirmer la commande</button>
+		</form>
+	</body>
+</html>

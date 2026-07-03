@@ -1,0 +1,59 @@
+---
+import { medusaFetch } from '../lib/medusa-client';
+
+// Page active uniquement en mode `medusa` (SSR à la demande, Palier 2).
+// En mode `snipcart` (statique) elle est prerendered sans lecture de cookie ni
+// appel réseau, afin de garder le build statique vert sans backend Medusa.
+export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
+
+let cart: any = null;
+let isB2B = false;
+
+if (import.meta.env.COMMERCE_MODE === 'medusa') {
+	const cartId = Astro.cookies.get('medusa_cart_id')?.value;
+	const token = Astro.cookies.get('medusa_jwt')?.value;
+
+	if (cartId) {
+		const res = await medusaFetch(`/store/carts/${cartId}`, {
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		});
+		({ cart } = await res.json());
+	}
+
+	if (token) {
+		const meRes = await medusaFetch('/store/customers/me', {
+			headers: { Authorization: `Bearer ${token}` },
+		});
+		if (meRes.ok) {
+			const { customer } = await meRes.json();
+			isB2B = (customer.groups ?? []).some((g: any) => g.name === 'B2B');
+		}
+	}
+}
+---
+
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<title>Panier</title>
+	</head>
+	<body>
+		<h1>Panier</h1>
+		{cart ? (
+			<>
+				<ul>
+					{cart.items.map((item: any) => (
+						<li>{item.title} × {item.quantity} - {(item.total / 100).toFixed(2)} €</li>
+					))}
+				</ul>
+				<p>Total : {(cart.total / 100).toFixed(2)} €</p>
+				<form method="GET" action="/checkout">
+					<input type="hidden" name="is_b2b" value={String(isB2B)} />
+					<button type="submit">Passer au paiement</button>
+				</form>
+			</>
+		) : (
+			<p>Panier vide.</p>
+		)}
+	</body>
+</html>
