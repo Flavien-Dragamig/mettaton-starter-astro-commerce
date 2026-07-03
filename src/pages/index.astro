@@ -1,15 +1,8 @@
 ---
-// Landing pilotée par le contenu (block-based).
-// Le contenu éditable vit dans src/content/pages/home.json (édité via Tina / Claude Code).
-// Ce fichier ne contient plus de texte en dur : il lit le singleton `home` et rend les blocs.
-import { getEntry } from 'astro:content';
-import Blocks from '../components/blocks/Blocks.astro';
-
-const home = await getEntry('pages', 'home');
-if (!home) {
-	throw new Error('Contenu introuvable : src/content/pages/home.json');
-}
-const { seo, header, blocks, footer } = home.data;
+// Page d'accueil provisoire du starter e-commerce : le système de blocs marketing
+// hérité de mettaton-starter-astro-landing a été retiré (scaffold, cf. Task 2 du
+// plan starter-astro-commerce) - la home définitive (catalogue, mise en avant
+// produits) est reconstruite par les tasks suivantes du même plan.
 const year = new Date().getFullYear();
 ---
 
@@ -18,34 +11,33 @@ const year = new Date().getFullYear();
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content={seo.description} />
+		<meta name="description" content="Boutique en ligne." />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>{seo.title}</title>
+		<title>Boutique</title>
 	</head>
 	<body>
 		<header class="site-header">
-			<a class="brand" href="/">{header.brand}</a>
+			<a class="brand" href="/">Boutique</a>
 			<nav class="nav">
-				{header.nav.map((l) => <a href={l.href}>{l.label}</a>)}
+				<a href="/boutique">Voir la boutique</a>
 			</nav>
 		</header>
 
 		<main>
-			<Blocks blocks={blocks} />
+			<section class="hero">
+				<div class="hero-inner">
+					<h1>Bienvenue</h1>
+					<p class="subtitle">Découvrez notre catalogue.</p>
+					<div class="hero-actions">
+						<a class="btn btn-primary btn-lg" href="/boutique">Voir la boutique</a>
+					</div>
+				</div>
+			</section>
 		</main>
 
 		<footer class="site-footer">
-			<p>© {year} {footer.text}</p>
-			<nav class="footer-nav">
-				{
-					footer.nav.map((l) => (
-						<a href={l.href} {...(l.external ? { target: '_blank', rel: 'noopener' } : {})}>
-							{l.label}
-						</a>
-					))
-				}
-			</nav>
+			<p>© {year}</p>
 		</footer>
 
 		<style is:global>
