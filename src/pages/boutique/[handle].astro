@@ -1,0 +1,39 @@
+---
+import { medusaFetch } from '../../lib/medusa-client';
+
+// Actif uniquement en mode `medusa` (SSR à la demande). En mode `snipcart`
+// (statique) la route est prerendered avec zéro chemin, donc aucun appel réseau
+// au build : le build statique reste vert sans backend Medusa.
+export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
+
+export async function getStaticPaths() {
+	// Uniquement invoqué en mode statique (prerender = true).
+	// Aucune page boutique générée hors mode medusa.
+	return [];
+}
+
+const { handle } = Astro.params;
+const res = await medusaFetch(`/store/products?handle=${encodeURIComponent(handle!)}`);
+const { products } = await res.json();
+const product = products[0];
+
+if (!product) {
+	return Astro.redirect('/boutique');
+}
+---
+
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<title>{product.title}</title>
+	</head>
+	<body>
+		<img src={product.thumbnail} alt={product.title} width="480" />
+		<h1>{product.title}</h1>
+		<p>{product.description}</p>
+		<form method="POST" action="/api/panier/ajouter">
+			<input type="hidden" name="variant_id" value={product.variants[0].id} />
+			<button type="submit">Ajouter au panier</button>
+		</form>
+	</body>
+</html>

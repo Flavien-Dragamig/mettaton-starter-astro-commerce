@@ -1,0 +1,34 @@
+---
+import { medusaFetch } from '../../lib/medusa-client';
+
+// Ces pages ne sont actives qu'en mode `medusa` (Palier 2, SSR à la demande).
+// En mode `snipcart` (Palier 1, statique) elles sont prerendered sans appel réseau
+// afin de garder le build statique vert sans backend Medusa.
+export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
+
+let products: any[] = [];
+if (import.meta.env.COMMERCE_MODE === 'medusa') {
+	const res = await medusaFetch('/store/products?limit=100');
+	({ products } = await res.json());
+}
+---
+
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<title>Boutique</title>
+	</head>
+	<body>
+		<h1>Boutique</h1>
+		<ul class="products-grid">
+			{products.map((p: any) => (
+				<li>
+					<a href={`/boutique/${p.handle}`}>
+						<img src={p.thumbnail} alt={p.title} width="240" />
+						<h2>{p.title}</h2>
+					</a>
+				</li>
+			))}
+		</ul>
+	</body>
+</html>
