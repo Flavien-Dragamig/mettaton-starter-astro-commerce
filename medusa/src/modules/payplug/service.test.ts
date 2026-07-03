@@ -57,7 +57,7 @@ describe("PayPlugPaymentProviderService", () => {
     });
     const service = makeService(fetchImpl as never);
 
-    await service.refundPayment({ data: { id: "pay_123" } } as never, 49.99);
+    await service.refundPayment({ data: { id: "pay_123" }, amount: 49.99 } as never);
 
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://api.payplug.com/v1/payments/pay_123/refunds",
@@ -65,14 +65,14 @@ describe("PayPlugPaymentProviderService", () => {
     );
   });
 
-  it("refundPayment inclut amount en centimes dans le body quand refundAmount est fourni (remboursement partiel)", async () => {
+  it("refundPayment inclut amount en centimes dans le body quand input.amount est fourni (remboursement partiel)", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ id: "re_123" }),
     });
     const service = makeService(fetchImpl as never);
 
-    await service.refundPayment({ data: { id: "pay_123" } } as never, 49.99);
+    await service.refundPayment({ data: { id: "pay_123" }, amount: 49.99 } as never);
 
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://api.payplug.com/v1/payments/pay_123/refunds",
@@ -80,7 +80,7 @@ describe("PayPlugPaymentProviderService", () => {
     );
   });
 
-  it("refundPayment envoie un body vide quand refundAmount est absent (remboursement total, comportement inchangé)", async () => {
+  it("refundPayment envoie un body vide quand input.amount est absent (remboursement total, comportement inchangé)", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ id: "re_123" }),

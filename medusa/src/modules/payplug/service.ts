@@ -126,19 +126,29 @@ export default class PayPlugPaymentProviderService extends AbstractPaymentProvid
     return { data: input.data ?? {} };
   }
 
-  async refundPayment(input: RefundPaymentInput, refundAmount?: number): Promise<RefundPaymentOutput> {
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     const id = (input.data as { id: string }).id;
     // PayPlug traite un champ `amount` absent comme "rembourser le solde
-    // restant total" - un `refundAmount` fourni doit donc impérativement être
-    // converti en centimes (même convention que buildCreatePaymentPayload) et
-    // transmis, sous peine de transformer silencieusement un remboursement
-    // partiel en remboursement total.
+    // restant total" - le montant d'un remboursement partiel arrive dans
+    // `input.amount` (interface réelle @medusajs/types : refundPayment ne
+    // prend qu'un seul argument, il n'y a pas de second paramètre
+    // `refundAmount`), et doit être converti en centimes (même convention que
+    // buildCreatePaymentPayload) sous peine de transformer silencieusement un
+    // remboursement partiel en remboursement total.
     const body =
-      refundAmount === undefined ? {} : { amount: Math.round(refundAmount * 100) };
+      input.amount == null ? {} : { amount: Math.round(new BigNumber(input.amount).numeric * 100) };
     await this.request(`/payments/${id}/refunds`, { method: "POST", body: JSON.stringify(body) });
     return { data: input.data ?? {} };
   }
 
+  /**
+   * PayPlug doit être configuré pour notifier
+   * `{MEDUSA_BACKEND_URL}/hooks/payment/payplug` - l'endpoint webhook
+   * intégré de Medusa v2 (routing par `provider_id`, ici "payplug" tel que
+   * déclaré dans medusa-config.ts), qui invoque automatiquement cette
+   * méthode via le pipeline standard `getWebhookActionAndData`. Aucune route
+   * custom n'est nécessaire côté `src/api/`.
+   */
   async getWebhookActionAndData(
     payload: ProviderWebhookPayload["payload"],
   ): Promise<WebhookActionResult> {
