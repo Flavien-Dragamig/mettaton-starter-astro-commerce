@@ -6,15 +6,9 @@ test('parcours B2B : login groupe B2B → option facture différée visible', as
 		{ name: 'medusa_cart_id', value: 'cart_1', domain: 'localhost', path: '/' },
 	]);
 
-	await page.route('**/store/customers/me', (route) =>
-		route.fulfill({ json: { customer: { groups: [{ name: 'B2B' }] } } }),
-	);
-	await page.route('**/store/carts/cart_1', (route) =>
-		route.fulfill({
-			json: { cart: { items: [{ title: 'T-shirt logo', quantity: 1, total: 1990 }], total: 1990 } },
-		}),
-	);
-
+	// Le customer B2B et le panier cart_1 viennent du mock SSR
+	// (tests/e2e/mock-medusa-server.mjs) : ces appels /store/* partent du serveur
+	// Astro, pas du navigateur, donc page.route ne peut pas les intercepter.
 	await page.goto('/panier');
 	await page.getByRole('button', { name: 'Passer au paiement' }).click();
 	await expect(page.getByLabel('Facture à 30 jours')).toBeVisible();
