@@ -16,16 +16,16 @@
     "backend:start": "node dist-backend/server.mjs"
   },
   "dependencies": {
-    "@tinacms/cli": "^2.4.4",
-    "@tinacms/datalayer": "^2.0.23",
+    "@tinacms/cli": "^2.5.2",
+    "@tinacms/datalayer": "^2.0.26",
     "astro": "^6.4.6",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^4.22.2",
     "memory-level": "^3.1.0",
-    "tinacms": "^3.9.1",
-    "tinacms-authjs": "^23.0.1",
-    "tinacms-gitprovider-github": "^4.1.10"
+    "tinacms": "^3.9.4",
+    "tinacms-authjs": "^23.0.4",
+    "tinacms-gitprovider-github": "^4.1.13"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
