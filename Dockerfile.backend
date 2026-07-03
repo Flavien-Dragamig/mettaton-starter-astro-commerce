@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1
+#
+# Backend TinaCMS self-host (datalayer + auth) — Mettaton Lot 4a.
+# « Un artefact, N sites » : l'image est entièrement paramétrée par variables
+# d'environnement (cf. .env.example). AUCUN secret n'est cuit dans l'image (canon §7.4).
+#
+# Étapes :
+#   - base    : installe les deps, puis 2 builds :
+#       1) `tina:build` = codegen SEUL (databaseClient + client + admin SPA).
+#          `--skip-indexing` : on n'indexe PAS le contenu au build. memory-level est éphémère →
+#          l'index est reconstruit au runtime depuis Git (database.indexContent). Indexer au build
+#          serait perdu, et l'étape d'indexation démarre un datalayer (port 9000) + lit `.git` → fragile.
+#       2) `backend:bundle` = bundle esbuild du serveur en un seul `dist-backend/server.mjs`
+#          (interop CJS/ESM résolue à la compilation : color-string, shims next-auth ; cf. build.mjs).
+#   - runtime : exécute le bundle via `node` en mode prod (TINA_PUBLIC_IS_LOCAL=false).
+
+FROM node:22-bookworm-slim AS base
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+# 1) Génère tina/__generated__/databaseClient + public/admin (gitignorés).
+RUN npm run tina:build
+# 2) Bundle le serveur backend (dist-backend/server.mjs) — pas de tsx au runtime.
+RUN npm run backend:bundle
+
+FROM node:22-bookworm-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV TINA_PUBLIC_IS_LOCAL=false
+ENV PORT=4001
+# App construite + node_modules (inclut tsx pour exécuter le serveur TypeScript).
+COPY --from=base /app ./
+EXPOSE 4001
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||4001)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["npm", "run", "backend:start"]

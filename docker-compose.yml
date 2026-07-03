@@ -1,0 +1,24 @@
+# Dev local du backend TinaCMS self-host (Mettaton Lot 4a) — hors Dokploy.
+#
+# Usage :
+#   1. cp .env.example .env.local  (renseigner NEXTAUTH_SECRET + GITHUB_* d'un repo de test)
+#   2. docker compose up --build
+#   3. Admin :  http://localhost:4001/admin     API : http://localhost:4001/api/tina
+#
+# memory-level = index en mémoire reconstruit depuis Git au boot → aucun volume requis.
+services:
+  tina-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: mettaton-tina-backend:dev
+    ports:
+      - "4001:4001"
+    environment:
+      TINA_PUBLIC_IS_LOCAL: "false"
+      PORT: "4001"
+      GITHUB_BRANCH: "${GITHUB_BRANCH:-main}"
+    env_file:
+      - path: .env.local
+        required: false
+    restart: unless-stopped

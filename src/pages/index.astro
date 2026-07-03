@@ -1,0 +1,188 @@
+---
+// Landing pilotée par le contenu (block-based).
+// Le contenu éditable vit dans src/content/pages/home.json (édité via Tina / Claude Code).
+// Ce fichier ne contient plus de texte en dur : il lit le singleton `home` et rend les blocs.
+import { getEntry } from 'astro:content';
+import Blocks from '../components/blocks/Blocks.astro';
+
+const home = await getEntry('pages', 'home');
+if (!home) {
+	throw new Error('Contenu introuvable : src/content/pages/home.json');
+}
+const { seo, header, blocks, footer } = home.data;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={seo.description} />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>{seo.title}</title>
+	</head>
+	<body>
+		<header class="site-header">
+			<a class="brand" href="/">{header.brand}</a>
+			<nav class="nav">
+				{header.nav.map((l) => <a href={l.href}>{l.label}</a>)}
+			</nav>
+		</header>
+
+		<main>
+			<Blocks blocks={blocks} />
+		</main>
+
+		<footer class="site-footer">
+			<p>© {year} {footer.text}</p>
+			<nav class="footer-nav">
+				{
+					footer.nav.map((l) => (
+						<a href={l.href} {...(l.external ? { target: '_blank', rel: 'noopener' } : {})}>
+							{l.label}
+						</a>
+					))
+				}
+			</nav>
+		</footer>
+
+		<style is:global>
+			:root {
+				/* Palette « papier chaud + argile » — plate, sans dégradé multicolore (anti-marqueur IA). */
+				--bg: #fbf8f4;
+				--surface: #ffffff;
+				--text: #1c1a17;
+				--muted: #6b645a;
+				--accent: #c2410c;
+				--accent-strong: #9a3412;
+				--border: #e7e0d6;
+				--max: 1100px;
+			}
+			* { box-sizing: border-box; }
+			html { scroll-behavior: smooth; }
+			body {
+				margin: 0;
+				font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+				background: var(--bg);
+				color: var(--text);
+				line-height: 1.6;
+			}
+			a { color: inherit; text-decoration: none; }
+			h1, h2, h3 { line-height: 1.15; margin: 0; }
+
+			.site-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				max-width: var(--max);
+				margin: 0 auto;
+				padding: 1.25rem 1.5rem;
+			}
+			.brand {
+				font-weight: 800;
+				font-size: 1.25rem;
+				letter-spacing: -0.02em;
+				color: var(--accent);
+			}
+			.nav a { color: var(--muted); margin-left: 1.5rem; font-size: 0.95rem; transition: color 0.2s; }
+			.nav a:hover { color: var(--text); }
+
+			.hero {
+				text-align: center;
+				padding: 5rem 1.5rem 4rem;
+				/* Surface plate, aucun glow radial. */
+			}
+			.hero-inner { max-width: 760px; margin: 0 auto; }
+			.eyebrow {
+				display: inline-block;
+				font-size: 0.8rem;
+				text-transform: uppercase;
+				letter-spacing: 0.12em;
+				color: var(--accent);
+				border: 1px solid var(--border);
+				border-radius: 999px;
+				padding: 0.35rem 0.9rem;
+				margin-bottom: 1.5rem;
+			}
+			.hero h1 {
+				font-size: clamp(2.2rem, 5vw, 3.5rem);
+				font-weight: 800;
+				letter-spacing: -0.03em;
+				margin-bottom: 1.25rem;
+			}
+			.subtitle { color: var(--muted); font-size: 1.15rem; margin: 0 auto 2rem; max-width: 620px; }
+			.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+			.btn {
+				display: inline-block;
+				padding: 0.8rem 1.6rem;
+				border-radius: 10px;
+				font-weight: 600;
+				font-size: 1rem;
+				transition: transform 0.15s ease, opacity 0.2s ease, background 0.2s ease;
+			}
+			.btn:hover { transform: translateY(-2px); }
+			.btn-primary {
+				background: var(--accent);
+				color: #fff;
+			}
+			.btn-primary:hover { background: var(--accent-strong); }
+			.btn-ghost { border: 1px solid var(--border); color: var(--text); }
+			.btn-ghost:hover { background: var(--surface); }
+			.btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+
+			.features { max-width: var(--max); margin: 0 auto; padding: 5rem 1.5rem; text-align: center; }
+			.section-title { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.02em; }
+			.section-lead { color: var(--muted); margin: 0.75rem auto 3rem; max-width: 520px; }
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+				gap: 1.5rem;
+				text-align: left;
+			}
+			.card {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 16px;
+				padding: 2rem;
+				transition: transform 0.2s ease, border-color 0.2s ease;
+			}
+			.card:hover { transform: translateY(-4px); border-color: var(--accent); }
+			.card-icon { font-size: 2rem; margin-bottom: 1rem; }
+			.card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+			.card p { color: var(--muted); margin: 0; }
+
+			.cta { padding: 1rem 1.5rem 6rem; }
+			.cta-inner {
+				max-width: var(--max);
+				margin: 0 auto;
+				text-align: center;
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 24px;
+				padding: 4rem 2rem;
+			}
+			.cta-inner h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.02em; }
+			.cta-inner p { color: var(--muted); margin: 1rem auto 2rem; max-width: 480px; }
+
+			.site-footer {
+				max-width: var(--max);
+				margin: 0 auto;
+				padding: 2rem 1.5rem 3rem;
+				border-top: 1px solid var(--border);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				gap: 1rem;
+				color: var(--muted);
+				font-size: 0.9rem;
+			}
+			.footer-nav a { margin-left: 1.5rem; transition: color 0.2s; }
+			.footer-nav a:first-child { margin-left: 0; }
+			.footer-nav a:hover { color: var(--text); }
+		</style>
+	</body>
+</html>
