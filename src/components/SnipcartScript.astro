@@ -1,0 +1,17 @@
+---
+// Note d'implémentation (Task 4 du plan snipcart-catalogue-dual-mode) : ce composant
+// est nominalement livré par la Task 5 (« Intégration Snipcart »), mais la Task 4 en a
+// besoin dès maintenant (import dans `boutique/[handle].astro`) pour que le build ne
+// casse pas. Créé ici a minima ; la Task 5 peut le retrouver déjà en place (idempotent
+// avec son propre Step 1) et se concentrer sur `.env.example` / `README.md`.
+const apiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY;
+---
+
+{apiKey && (
+	<>
+		<link rel="preconnect" href="https://app.snipcart.com" />
+		<link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.7.1/default/snipcart.css" />
+		<div hidden id="snipcart" data-api-key={apiKey}></div>
+		<script async src="https://cdn.snipcart.com/themes/v3.7.1/default/snipcart.js"></script>
+	</>
+)}

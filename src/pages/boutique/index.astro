@@ -1,15 +1,22 @@
 ---
+import { getCollection } from 'astro:content';
 import { medusaFetch } from '../../lib/medusa-client';
 
-// Ces pages ne sont actives qu'en mode `medusa` (Palier 2, SSR à la demande).
-// En mode `snipcart` (Palier 1, statique) elles sont prerendered sans appel réseau
-// afin de garder le build statique vert sans backend Medusa.
+// Ces pages sont actives dans les deux modes. En mode `medusa` (Palier 2, SSR), on
+// interroge l'API Store Medusa. En mode `snipcart` (Palier 1, statique), on lit le
+// catalogue Tina — aucun appel réseau au build.
 export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
 
-let products: any[] = [];
-if (import.meta.env.COMMERCE_MODE === 'medusa') {
+const commerceMode = import.meta.env.COMMERCE_MODE ?? 'snipcart';
+
+let medusaProducts: any[] = [];
+let snipcartProducts: Awaited<ReturnType<typeof getCollection<'products'>>> = [];
+
+if (commerceMode === 'medusa') {
 	const res = await medusaFetch('/store/products?limit=100');
-	({ products } = await res.json());
+	({ products: medusaProducts } = await res.json());
+} else {
+	snipcartProducts = await getCollection('products');
 }
 ---
 
@@ -20,15 +27,29 @@ if (import.meta.env.COMMERCE_MODE === 'medusa') {
 	</head>
 	<body>
 		<h1>Boutique</h1>
-		<ul class="products-grid">
-			{products.map((p: any) => (
-				<li>
-					<a href={`/boutique/${p.handle}`}>
-						<img src={p.thumbnail} alt={p.title} width="240" />
-						<h2>{p.title}</h2>
-					</a>
-				</li>
-			))}
-		</ul>
+		{commerceMode === 'medusa' ? (
+			<ul class="products-grid">
+				{medusaProducts.map((p: any) => (
+					<li>
+						<a href={`/boutique/${p.handle}`}>
+							<img src={p.thumbnail} alt={p.title} width="240" />
+							<h2>{p.title}</h2>
+						</a>
+					</li>
+				))}
+			</ul>
+		) : (
+			<ul class="products-grid">
+				{snipcartProducts.map((p) => (
+					<li>
+						<a href={`/boutique/${p.id}`}>
+							<img src={p.data.image} alt={p.data.name} width="240" />
+							<h2>{p.data.name}</h2>
+							<p>{p.data.price.toFixed(2)} €</p>
+						</a>
+					</li>
+				))}
+			</ul>
+		)}
 	</body>
 </html>

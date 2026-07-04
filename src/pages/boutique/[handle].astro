@@ -1,39 +1,75 @@
 ---
+import { getCollection } from 'astro:content';
 import { medusaFetch } from '../../lib/medusa-client';
+import SnipcartScript from '../../components/SnipcartScript.astro';
 
-// Actif uniquement en mode `medusa` (SSR à la demande). En mode `snipcart`
-// (statique) la route est prerendered avec zéro chemin, donc aucun appel réseau
-// au build : le build statique reste vert sans backend Medusa.
 export const prerender = import.meta.env.COMMERCE_MODE !== 'medusa';
 
 export async function getStaticPaths() {
-	// Uniquement invoqué en mode statique (prerender = true).
-	// Aucune page boutique générée hors mode medusa.
-	return [];
+	// Appelé uniquement quand prerender = true, donc uniquement en mode snipcart.
+	const products = await getCollection('products');
+	return products.map((p) => ({ params: { handle: p.id }, props: { product: p } }));
 }
 
+const commerceMode = import.meta.env.COMMERCE_MODE ?? 'snipcart';
 const { handle } = Astro.params;
-const res = await medusaFetch(`/store/products?handle=${encodeURIComponent(handle!)}`);
-const { products } = await res.json();
-const product = products[0];
 
-if (!product) {
-	return Astro.redirect('/boutique');
+let title: string;
+let description: string;
+let image: string;
+let price: number | undefined;
+let sku: string | undefined;
+let variantId: string | undefined;
+
+if (commerceMode === 'medusa') {
+	const res = await medusaFetch(`/store/products?handle=${encodeURIComponent(handle!)}`);
+	const { products } = await res.json();
+	const product = products[0];
+	if (!product) return Astro.redirect('/boutique');
+	title = product.title;
+	description = product.description;
+	image = product.thumbnail;
+	variantId = product.variants[0].id;
+} else {
+	const { product } = Astro.props as { product: Awaited<ReturnType<typeof getCollection<'products'>>>[number] };
+	if (!product) return Astro.redirect('/boutique');
+	title = product.data.name;
+	description = product.data.description;
+	image = product.data.image;
+	price = product.data.price;
+	sku = product.data.sku;
 }
 ---
 
 <html lang="fr">
 	<head>
 		<meta charset="utf-8" />
-		<title>{product.title}</title>
+		<title>{title}</title>
 	</head>
 	<body>
-		<img src={product.thumbnail} alt={product.title} width="480" />
-		<h1>{product.title}</h1>
-		<p>{product.description}</p>
-		<form method="POST" action="/api/panier/ajouter">
-			<input type="hidden" name="variant_id" value={product.variants[0].id} />
-			<button type="submit">Ajouter au panier</button>
-		</form>
+		<img src={image} alt={title} width="480" />
+		<h1>{title}</h1>
+		{price !== undefined && <p class="price">{price.toFixed(2)} €</p>}
+		<p>{description}</p>
+
+		{commerceMode === 'medusa' ? (
+			<form method="POST" action="/api/panier/ajouter">
+				<input type="hidden" name="variant_id" value={variantId} />
+				<button type="submit">Ajouter au panier</button>
+			</form>
+		) : (
+			<button
+				class="snipcart-add-item"
+				data-item-id={sku}
+				data-item-price={price}
+				data-item-url={`/boutique/${handle}`}
+				data-item-description={description}
+				data-item-name={title}
+			>
+				Ajouter au panier
+			</button>
+		)}
+
+		<SnipcartScript />
 	</body>
 </html>
