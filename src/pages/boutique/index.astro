@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { medusaFetch } from '../../lib/medusa-client';
+import SnipcartScript from '../../components/SnipcartScript.astro';
 
 // Ces pages sont actives dans les deux modes. En mode `medusa` (Palier 2, SSR), on
 // interroge l'API Store Medusa. En mode `snipcart` (Palier 1, statique), on lit le
@@ -51,5 +52,7 @@ if (commerceMode === 'medusa') {
 				))}
 			</ul>
 		)}
+
+		<SnipcartScript />
 	</body>
 </html>

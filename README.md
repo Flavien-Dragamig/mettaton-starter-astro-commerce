@@ -63,3 +63,29 @@ En local, l'auth + le datalayer sont servis par `tinacms dev` (filesystem + git,
 données). En production, le backend Tina self-host (datalayer + AuthJS + git provider) est hébergé
 séparément (**Docker / Dokploy — Lot 4**) ; son contrat figure dans `tina/backend/handler.ts` et
 les variables d'environnement correspondantes dans `.env.example`.
+
+## Boutique (commerce)
+
+Le starter gère un catalogue produits (`src/content/products/`, édité via Tina — miroir
+`tina/config.ts` / `src/content.config.ts`) et l'affiche sur `/boutique` (liste) et
+`/boutique/[handle]` (fiche produit). Le mode commerce est choisi **à la build**, via
+`COMMERCE_MODE` (`.env.example`) :
+
+- **`snipcart`** (Palier 1, défaut) — pages statiques (`prerender = true`), lecture directe du
+  catalogue Tina, aucun appel réseau au build. Le panier est délégué à **Snipcart**.
+- **`medusa`** (Palier 2, SSR) — interroge l'API Store Medusa au lieu du catalogue Tina.
+
+### Intégration Snipcart (Palier 1)
+
+1. Créer un compte sur [snipcart.com](https://snipcart.com) puis récupérer la **clé publique**
+   (Dashboard > Account > API Keys > Public key).
+2. Renseigner `PUBLIC_SNIPCART_API_KEY` dans `.env.local` (voir `.env.example`).
+3. Le composant `src/components/SnipcartScript.astro` injecte le script/CSS Snipcart sur
+   `/boutique` et `/boutique/[handle]` — uniquement si la clé est définie (sinon rien ne se
+   charge, y compris en dev sans clé).
+4. Les boutons « Ajouter au panier » de `/boutique/[handle]` portent les attributs
+   `data-item-*` attendus par Snipcart (id, prix, nom, description, URL), lus par le script une
+   fois chargé.
+
+Sans clé (`PUBLIC_SNIPCART_API_KEY` vide), le build et le rendu des pages boutique restent
+fonctionnels — seul le script panier est absent, aucune régression.
