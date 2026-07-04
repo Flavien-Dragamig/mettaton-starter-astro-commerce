@@ -20,6 +20,7 @@ let image: string;
 let price: number | undefined;
 let sku: string | undefined;
 let variantId: string | undefined;
+let variants: Array<{ label: string; sku: string }> | undefined;
 
 if (commerceMode === 'medusa') {
 	const res = await medusaFetch(`/store/products?handle=${encodeURIComponent(handle!)}`);
@@ -38,6 +39,7 @@ if (commerceMode === 'medusa') {
 	image = product.data.image;
 	price = product.data.price;
 	sku = product.data.sku;
+	variants = product.data.variants;
 }
 ---
 
@@ -58,16 +60,36 @@ if (commerceMode === 'medusa') {
 				<button type="submit">Ajouter au panier</button>
 			</form>
 		) : (
-			<button
-				class="snipcart-add-item"
-				data-item-id={sku}
-				data-item-price={price}
-				data-item-url={`/boutique/${handle}`}
-				data-item-description={description}
-				data-item-name={title}
-			>
-				Ajouter au panier
-			</button>
+			<>
+				{variants && variants.length > 0 && (
+					<select name="variant">
+						{variants.map((v) => (
+							<option value={v.sku}>{v.label}</option>
+						))}
+					</select>
+				)}
+				{/*
+					Champ custom Snipcart (data-item-customN-*) : les variantes ne sont PAS
+					câblées à un SKU/prix distinct côté Snipcart (pas de backend de validation
+					dans ce Palier 1 minimal). Le SKU/prix facturé reste celui du produit parent ;
+					la variante choisie n'est ici qu'une information affichée dans le panier et la
+					commande (voir README.md, section Snipcart).
+				*/}
+				<button
+					class="snipcart-add-item"
+					data-item-id={sku}
+					data-item-price={price}
+					data-item-url={`/boutique/${handle}`}
+					data-item-description={description}
+					data-item-name={title}
+					data-item-custom1-name={variants && variants.length > 0 ? 'Taille' : undefined}
+					data-item-custom1-options={
+						variants && variants.length > 0 ? variants.map((v) => v.label).join('|') : undefined
+					}
+				>
+					Ajouter au panier
+				</button>
+			</>
 		)}
 
 		<SnipcartScript />

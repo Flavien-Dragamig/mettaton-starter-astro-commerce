@@ -86,6 +86,15 @@ Le starter gère un catalogue produits (`src/content/products/`, édité via Tin
 4. Les boutons « Ajouter au panier » de `/boutique/[handle]` portent les attributs
    `data-item-*` attendus par Snipcart (id, prix, nom, description, URL), lus par le script une
    fois chargé.
+5. **Variantes produit** (`variants` du schéma `products`, ex. tailles S/M/L) : si le produit
+   en déclare, un `<select>` natif les liste avant le bouton d'ajout, et le bouton porte en plus
+   `data-item-custom1-name="Taille"` / `data-item-custom1-options="S|M|L"` — le champ custom
+   Snipcart standard pour une liste d'options. Ce champ est **informatif uniquement** : la
+   variante choisie apparaît dans le panier et la commande, mais le **SKU et le prix facturés
+   restent ceux du produit parent** (`sku`/`price`). Snipcart ne gère pas nativement un
+   SKU/prix/stock distinct par option de champ custom sans backend de validation ; ce Palier 1
+   minimal ne fait donc pas de suivi de stock par variante ni de sur/sous-vente par taille. Si un
+   produit ne déclare pas de `variants`, rien de plus n'est affiché (comportement inchangé).
 
 Sans clé (`PUBLIC_SNIPCART_API_KEY` vide), le build et le rendu des pages boutique restent
 fonctionnels — seul le script panier est absent, aucune régression.
