@@ -212,6 +212,36 @@ export default defineConfig({
 					},
 				],
 			},
+			{
+				name: 'products',
+				label: 'Produits',
+				path: 'src/content/products',
+				format: 'md',
+				fields: [
+					{ type: 'string', name: 'name', label: 'Nom du produit', required: true },
+					{
+						type: 'string',
+						name: 'description',
+						label: 'Description',
+						required: true,
+						ui: { component: 'textarea' },
+					},
+					{ type: 'number', name: 'price', label: 'Prix (€ TTC)', required: true },
+					{ type: 'image', name: 'image', label: 'Photo produit' },
+					{ type: 'string', name: 'sku', label: 'Référence (SKU)', required: true },
+					{
+						type: 'object',
+						name: 'variants',
+						label: 'Variantes (taille/couleur)',
+						list: true,
+						ui: { itemProps: (item) => ({ label: item?.label }) },
+						fields: [
+							{ type: 'string', name: 'label', label: 'Libellé', required: true },
+							{ type: 'string', name: 'sku', label: 'Référence variante', required: true },
+						],
+					},
+				],
+			},
 		],
 	},
 });

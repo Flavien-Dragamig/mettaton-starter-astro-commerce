@@ -81,4 +81,21 @@ const pages = defineCollection({
 	}),
 });
 
-export const collections = { pages };
+const productVariant = z.object({
+	label: z.string(),
+	sku: z.string(),
+});
+
+const products = defineCollection({
+	loader: glob({ base: './src/content/products', pattern: '**/*.md' }),
+	schema: z.object({
+		name: z.string(),
+		description: z.string(),
+		price: z.number(),
+		image: z.string(),
+		sku: z.string(),
+		variants: z.array(productVariant).optional(),
+	}),
+});
+
+export const collections = { pages, products };
