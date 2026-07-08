@@ -18,7 +18,7 @@
     "backend:start": "node dist-backend/server.mjs"
   },
   "dependencies": {
-    "@tinacms/cli": "^2.4.4",
+    "@tinacms/cli": "^2.5.2",
     "@tinacms/datalayer": "^2.0.23",
     "astro": "^6.4.6",
     "cookie-parser": "^1.4.7",
