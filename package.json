@@ -23,7 +23,7 @@
     "astro": "^6.4.6",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "express": "^4.22.2",
+    "express": "^5.2.1",
     "memory-level": "^3.1.0",
     "tinacms": "^3.9.1",
     "tinacms-authjs": "^23.0.1",
