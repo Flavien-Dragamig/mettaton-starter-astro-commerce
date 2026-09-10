@@ -20,7 +20,7 @@
   "dependencies": {
     "@tinacms/cli": "^2.4.4",
     "@tinacms/datalayer": "^2.0.23",
-    "astro": "^6.4.6",
+    "astro": "^7.3.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^4.22.2",
@@ -30,7 +30,7 @@
     "tinacms-gitprovider-github": "^4.1.10"
   },
   "devDependencies": {
-    "@astrojs/node": "^10.1.4",
+    "@astrojs/node": "^11.1.5",
     "@playwright/test": "^1.61.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
